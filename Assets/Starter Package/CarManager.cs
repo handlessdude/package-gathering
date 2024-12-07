@@ -18,6 +18,7 @@ using System.Collections;
 
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
+using UnityEngine.InputSystem;
 
 /**
  * Spawns a <see cref="CarBehaviour"/> when a plane is tapped.
@@ -36,7 +37,9 @@ public class CarManager : MonoBehaviour
         {
             // Spawn our car at the reticle location.
             var obj = GameObject.Instantiate(CarPrefab);
+            TextUtils.AppendTextToTaggedObject("Car Instantiated");
             Car = obj.GetComponent<CarBehaviour>();
+            TextUtils.AppendTextToTaggedObject("Car Set");
             Car.Reticle = Reticle;
             Car.transform.position = Reticle.transform.position;
             DrivingSurfaceManager.LockPlane(Reticle.CurrentPlane);
@@ -45,22 +48,18 @@ public class CarManager : MonoBehaviour
 
     private bool WasTapped()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Touchscreen.current != null && Touchscreen.current.primaryTouch.press.wasPressedThisFrame)
         {
             return true;
         }
 
-        if (Input.touchCount == 0)
+        /*
+        if (Mouse.current != null && Mouse.current.leftButton.wasPressedThisFrame)
         {
-            return false;
+            return true;
         }
+        */
 
-        var touch = Input.GetTouch(0);
-        if (touch.phase != TouchPhase.Began)
-        {
-            return false;
-        }
-
-        return true;
+        return false;
     }
 }

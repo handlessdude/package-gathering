@@ -42,17 +42,11 @@ public class ReticleBehaviour : MonoBehaviour
         
         var hits = new List<ARRaycastHit>();
         DrivingSurfaceManager.RaycastManager.Raycast(screenCenter, hits, TrackableType.PlaneWithinBounds);
-
-        if (DrivingSurfaceManager.PlaneManager.trackables.count > 0)
-        {
-            TextUtils.AppendTextToTaggedObject($"PlaneManager.trackables.count = {DrivingSurfaceManager.PlaneManager.trackables.count}");
-        }
         
         CurrentPlane = null;
         ARRaycastHit? hit = null;
         if (hits.Count > 0)
         {
-            TextUtils.AppendTextToTaggedObject("Hits found");
             // If you don't have a locked plane already...
             var lockedPlane = DrivingSurfaceManager.LockedPlane;
             hit = lockedPlane == null
@@ -63,7 +57,6 @@ public class ReticleBehaviour : MonoBehaviour
         }
         if (hit.HasValue)
         {
-            TextUtils.AppendTextToTaggedObject("ReticleBehaviour Update: setting CurrentPlane");
             CurrentPlane = DrivingSurfaceManager.PlaneManager.GetPlane(hit.Value.trackableId);
             // Move this reticle to the location of the hit.
             transform.position = hit.Value.pose.position;
