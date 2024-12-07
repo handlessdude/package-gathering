@@ -39,13 +39,15 @@ public class DrivingSurfaceManager : MonoBehaviour
         }
 
         LockedPlane = arPlane;
-        Debug.Log(LockedPlane);
+        TextUtils.AppendTextToTaggedObject($"Update LockedPlane: {LockedPlane}");
+        
         PlaneManager.planesChanged += DisableNewPlanes;
     }
 
     private void Start()
     {
         PlaneManager = GetComponent<ARPlaneManager>();
+        RaycastManager = GetComponent<ARRaycastManager>();
     }
 
     private void Update()
@@ -53,6 +55,7 @@ public class DrivingSurfaceManager : MonoBehaviour
         if (LockedPlane?.subsumedBy != null)
         {
             LockedPlane = LockedPlane.subsumedBy;
+            TextUtils.AppendTextToTaggedObject($"Update LockedPlane: {LockedPlane}");
         }
     }
 
