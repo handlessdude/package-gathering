@@ -37,9 +37,7 @@ public class CarManager : MonoBehaviour
         {
             // Spawn our car at the reticle location.
             var obj = GameObject.Instantiate(CarPrefab);
-            TextUtils.AppendTextToTaggedObject("Car Instantiated");
             Car = obj.GetComponent<CarBehaviour>();
-            TextUtils.AppendTextToTaggedObject("Car Set");
             Car.Reticle = Reticle;
             Car.transform.position = Reticle.transform.position;
             DrivingSurfaceManager.LockPlane(Reticle.CurrentPlane);

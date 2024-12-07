@@ -39,7 +39,6 @@ public class DrivingSurfaceManager : MonoBehaviour
         }
 
         LockedPlane = arPlane;
-        TextUtils.AppendTextToTaggedObject($"Update LockedPlane: {LockedPlane}");
         
         PlaneManager.planesChanged += DisableNewPlanes;
     }
@@ -55,7 +54,6 @@ public class DrivingSurfaceManager : MonoBehaviour
         if (LockedPlane?.subsumedBy != null)
         {
             LockedPlane = LockedPlane.subsumedBy;
-            TextUtils.AppendTextToTaggedObject($"Update LockedPlane: {LockedPlane}");
         }
     }
 
