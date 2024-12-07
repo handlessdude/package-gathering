@@ -16,6 +16,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
 
@@ -38,6 +39,7 @@ public class DrivingSurfaceManager : MonoBehaviour
         }
 
         LockedPlane = arPlane;
+        Debug.Log(LockedPlane);
         PlaneManager.planesChanged += DisableNewPlanes;
     }
 
