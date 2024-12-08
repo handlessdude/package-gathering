@@ -73,11 +73,10 @@ public class PackageSpawner : MonoBehaviour
         {
             if (hit.collider.gameObject == Package.gameObject)
             {
-                // Check if the current package is already using the alternate prefab
                 if (PackagePrefab != AlternatePackagePrefab && 
                     Package.gameObject.name.StartsWith(AlternatePackagePrefab.name))
                 {
-                    return; // Do nothing if already alternate
+                    return;
                 }
                 
                 ReplacePackagePrefab();
@@ -85,27 +84,27 @@ public class PackageSpawner : MonoBehaviour
         }
     }
     
-    private float TRANSITION_DURATION = 2f;
+    private float TRANSITION_DURATION = 0.75f;
         
     private void ReplacePackagePrefab()
     {
         if (Package != null)
         {
-            // Spawn the particle effect
             if (TransitionEffectPrefab != null)
             {
                 var effect = Instantiate(TransitionEffectPrefab, Package.transform.position, Quaternion.identity);
-                Destroy(effect.gameObject, TRANSITION_DURATION); // Destroy the particle system after its duration
+                Destroy(effect.gameObject, TRANSITION_DURATION);
             }
-
-            // Create the new package
+            
             var packageClone = Instantiate(AlternatePackagePrefab);
             packageClone.transform.position = Package.transform.position;
-
-            // Start smooth transition
+            
             StartCoroutine(SmoothReplacePackage(Package.gameObject, packageClone));
-
-            // Update the reference to the new package
+            
+            StartCoroutine(
+                SmoothFadeParticleAndSound(TransitionEffectPrefab, TransitionEffectPrefab.GetComponent<AudioSource>())
+            );
+            
             Package = packageClone.GetComponent<PackageBehaviour>();
         }
     }
@@ -114,7 +113,6 @@ public class PackageSpawner : MonoBehaviour
     
     private IEnumerator SmoothReplacePackage(GameObject oldPackage, GameObject newPackage)
     {
-        float duration = 0.5f; // Duration of the transition
         float elapsed = 0;
 
         Vector3 oldPackageOriginalScale = oldPackage.transform.localScale;
@@ -123,26 +121,62 @@ public class PackageSpawner : MonoBehaviour
         Vector3 newPackageTargetScale = Vector3.one; // Final scale (1, 1, 1)
         newPackage.transform.localScale = Vector3.zero; // Start at scale zero
 
-        while (elapsed < duration)
+        while (elapsed < TRANSITION_DURATION)
         {
-            float t = elapsed / duration; // Normalized time (0 to 1)
-
-            // Smoothly scale out the old package
+            float t = elapsed / TRANSITION_DURATION; // Normalized time (0 to 1)
+            
             oldPackage.transform.localScale = Vector3.Lerp(oldPackageOriginalScale, oldPackageTargetScale, t);
-
-            // Smoothly scale in the new package
             newPackage.transform.localScale = Vector3.Lerp(Vector3.zero, newPackageTargetScale, t);
 
             elapsed += Time.deltaTime;
             yield return null;
         }
-
-        // Ensure the final scales are correctly set
+        
         oldPackage.transform.localScale = oldPackageTargetScale;
         newPackage.transform.localScale = newPackageTargetScale;
-
-        // Destroy the old package
+        
         Destroy(oldPackage);
+    }
+    
+    private IEnumerator SmoothFadeParticleAndSound(ParticleSystem particleSystem, AudioSource audioSource)
+    {
+        float elapsed = 0;
+        
+        ParticleSystem.EmissionModule emission = particleSystem.emission;
+        float initialRate = emission.rateOverTime.constant;
+        
+        float initialVolume = 0;
+        if (audioSource != null)
+        {
+            initialVolume = audioSource.volume;
+        }
+
+        while (elapsed < TRANSITION_DURATION)
+        {
+            float t = elapsed / TRANSITION_DURATION; // Normalized time (0 to 1)
+            
+            emission.rateOverTime = Mathf.Lerp(initialRate, 0, t);
+            if (audioSource != null)
+            {
+               audioSource.volume = Mathf.Lerp(initialVolume, 0, t);
+            }
+            
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+        
+        emission.rateOverTime = 0;
+        if (audioSource != null)
+        {
+            audioSource.volume = 0;
+        }
+        
+        particleSystem.Stop();
+        
+        if (audioSource != null)
+        {
+            audioSource.Stop();
+        }
     }
     
     private void Update()
