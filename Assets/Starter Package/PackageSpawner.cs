@@ -27,6 +27,8 @@ public class PackageSpawner : MonoBehaviour
     public GameObject PackagePrefab;
     public GameObject AlternatePackagePrefab;
     
+    public ParticleSystem TransitionEffectPrefab;
+    
     public static Vector3 RandomInTriangle(Vector3 v1, Vector3 v2)
     {
         float u = Random.Range(0.0f, 1.0f);
@@ -71,25 +73,77 @@ public class PackageSpawner : MonoBehaviour
         {
             if (hit.collider.gameObject == Package.gameObject)
             {
+                // Check if the current package is already using the alternate prefab
+                if (PackagePrefab != AlternatePackagePrefab && 
+                    Package.gameObject.name.StartsWith(AlternatePackagePrefab.name))
+                {
+                    return; // Do nothing if already alternate
+                }
+                
                 ReplacePackagePrefab();
             }
         }
     }
     
+    private float TRANSITION_DURATION = 2f;
+        
     private void ReplacePackagePrefab()
     {
         if (Package != null)
         {
-            Destroy(Package.gameObject);
+            // Spawn the particle effect
+            if (TransitionEffectPrefab != null)
+            {
+                var effect = Instantiate(TransitionEffectPrefab, Package.transform.position, Quaternion.identity);
+                Destroy(effect.gameObject, TRANSITION_DURATION); // Destroy the particle system after its duration
+            }
 
+            // Create the new package
             var packageClone = Instantiate(AlternatePackagePrefab);
             packageClone.transform.position = Package.transform.position;
 
+            // Start smooth transition
+            StartCoroutine(SmoothReplacePackage(Package.gameObject, packageClone));
+
+            // Update the reference to the new package
             Package = packageClone.GetComponent<PackageBehaviour>();
         }
     }
     
-    //
+    // transition
+    
+    private IEnumerator SmoothReplacePackage(GameObject oldPackage, GameObject newPackage)
+    {
+        float duration = 0.5f; // Duration of the transition
+        float elapsed = 0;
+
+        Vector3 oldPackageOriginalScale = oldPackage.transform.localScale;
+        Vector3 oldPackageTargetScale = Vector3.zero; // Shrinks to zero
+
+        Vector3 newPackageTargetScale = Vector3.one; // Final scale (1, 1, 1)
+        newPackage.transform.localScale = Vector3.zero; // Start at scale zero
+
+        while (elapsed < duration)
+        {
+            float t = elapsed / duration; // Normalized time (0 to 1)
+
+            // Smoothly scale out the old package
+            oldPackage.transform.localScale = Vector3.Lerp(oldPackageOriginalScale, oldPackageTargetScale, t);
+
+            // Smoothly scale in the new package
+            newPackage.transform.localScale = Vector3.Lerp(Vector3.zero, newPackageTargetScale, t);
+
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        // Ensure the final scales are correctly set
+        oldPackage.transform.localScale = oldPackageTargetScale;
+        newPackage.transform.localScale = newPackageTargetScale;
+
+        // Destroy the old package
+        Destroy(oldPackage);
+    }
     
     private void Update()
     {

@@ -257,7 +257,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &187208204
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -841,6 +841,8 @@ MonoBehaviour:
   PackagePrefab: {fileID: 7734861169323980269, guid: 173685bc93484464b88d9f788d582359,
     type: 3}
   AlternatePackagePrefab: {fileID: 7657548977611231357, guid: 34da398fe7a5a1d40ba676548e3cf3ac,
+    type: 3}
+  TransitionEffectPrefab: {fileID: 19800010, guid: d27ff9986b061e0438b5492e79bee658,
     type: 3}
 --- !u!4 &1797007510
 Transform:
