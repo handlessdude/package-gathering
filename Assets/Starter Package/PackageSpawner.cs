@@ -28,6 +28,7 @@ public class PackageSpawner : MonoBehaviour
     public GameObject AlternatePackagePrefab;
     
     public ParticleSystem TransitionEffectPrefab;
+    private bool isPackageTransitioning = false;
     
     public static Vector3 RandomInTriangle(Vector3 v1, Vector3 v2)
     {
@@ -95,7 +96,8 @@ public class PackageSpawner : MonoBehaviour
                 var effect = Instantiate(TransitionEffectPrefab, Package.transform.position, Quaternion.identity);
                 Destroy(effect.gameObject, TRANSITION_DURATION);
             }
-            
+
+            isPackageTransitioning = true;
             var packageClone = Instantiate(AlternatePackagePrefab);
             packageClone.transform.position = Package.transform.position;
             
@@ -106,6 +108,7 @@ public class PackageSpawner : MonoBehaviour
             );
             
             Package = packageClone.GetComponent<PackageBehaviour>();
+            isPackageTransitioning = false;
         }
     }
     
@@ -190,7 +193,7 @@ public class PackageSpawner : MonoBehaviour
         var lockedPlane = DrivingSurfaceManager.LockedPlane;
         if (lockedPlane != null)
         {
-            if (Package == null)
+            if (Package == null && !isPackageTransitioning)
             {
                 SpawnPackage(lockedPlane);
             }
