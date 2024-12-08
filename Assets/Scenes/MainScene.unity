@@ -840,6 +840,8 @@ MonoBehaviour:
   Package: {fileID: 0}
   PackagePrefab: {fileID: 7734861169323980269, guid: 173685bc93484464b88d9f788d582359,
     type: 3}
+  AlternatePackagePrefab: {fileID: 7657548977611231357, guid: 3cbfcd4079a5031478389d5ab3c8c311,
+    type: 3}
 --- !u!4 &1797007510
 Transform:
   m_ObjectHideFlags: 0

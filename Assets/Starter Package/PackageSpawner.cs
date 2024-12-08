@@ -18,13 +18,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
+using UnityEngine.InputSystem;
 
 public class PackageSpawner : MonoBehaviour
 {
     public DrivingSurfaceManager DrivingSurfaceManager;
     public PackageBehaviour Package;
     public GameObject PackagePrefab;
-
+    public GameObject AlternatePackagePrefab;
+    
     public static Vector3 RandomInTriangle(Vector3 v1, Vector3 v2)
     {
         float u = Random.Range(0.0f, 1.0f);
@@ -59,8 +61,44 @@ public class PackageSpawner : MonoBehaviour
         Package = packageClone.GetComponent<PackageBehaviour>();
     }
 
+    // appearance change
+    
+    private void TryChangeAppearance()
+    {
+        var touchPosition = Touchscreen.current.primaryTouch.position.ReadValue();
+        var ray = Camera.main.ScreenPointToRay(touchPosition);
+        if (Physics.Raycast(ray, out RaycastHit hit))
+        {
+            if (hit.collider.gameObject == Package.gameObject)
+            {
+                ReplacePackagePrefab();
+            }
+        }
+    }
+    
+    private void ReplacePackagePrefab()
+    {
+        if (Package != null)
+        {
+            Destroy(Package.gameObject);
+
+            var packageClone = Instantiate(AlternatePackagePrefab);
+            packageClone.transform.position = Package.transform.position;
+
+            Package = packageClone.GetComponent<PackageBehaviour>();
+        }
+    }
+    
+    //
+    
     private void Update()
     {
+        if (Touchscreen.current != null && Touchscreen.current.primaryTouch.press.wasReleasedThisFrame)
+        {
+            TryChangeAppearance();
+            return;
+        }
+        
         var lockedPlane = DrivingSurfaceManager.LockedPlane;
         if (lockedPlane != null)
         {
